@@ -1,0 +1,392 @@
+"Games"
+{
+	"left4dead2"
+	{
+		"Offsets"
+		{
+			"CBaseCombatCharacter::Weapon_GetSlot"
+			{
+				"linux"		"289"
+				"windows"	"288"
+			}
+
+			"CBasePlayer::RemovePlayerItem"
+			{
+				"linux"		"291"
+				"windows"	"290"
+			}
+
+			"m_music"
+			{
+				"class"	"CTerrorPlayer"
+				"prop"	"m_music"
+			}
+
+			"m_customAbility"
+			{
+				"class"	"CTerrorPlayer"
+				"prop"	"m_customAbility"
+			}
+
+			"m_zombieClass"
+			{
+				"class"	"CTerrorPlayer"
+				"prop"	"m_zombieClass"
+			}
+
+			"m_hThrower"
+			{
+				"class"	"CBaseGrenade"
+				"prop"	"m_hThrower"
+			}
+
+			
+		}
+
+		"Addresses"
+		{
+			"TheZombieManager"
+			{
+				"windows"
+				{
+					"signature"	"InfoChangelevel::StartChangeLevel"
+					"read"		"293"
+				}
+				"linux"
+				{
+					"signature" "InfoChangelevel::StartChangeLevel"
+					"read"		"263"
+				}
+				"read" "0"
+			}
+
+			"TheDirector"
+			{
+				"windows"
+				{
+					"signature"	"CDirectorMusicBanks::OnRoundStart"
+					"read"		"12"
+				}
+				"linux"
+				{
+					"signature"	"CDirectorMusicBanks::OnRoundStart"
+					"read"		"10"
+				}
+				"read" "0"
+			}
+
+			"CurrentFinaleStage"
+			{
+				"windows"
+				{
+					"signature"	"CDirectorMusicBanks::OnRoundStart"
+					"read"		"12"
+					"read"		"0"
+					"read"		"1592"
+					"offset"	"4"
+				}
+				"linux"
+				{
+					"signature"	"CDirectorMusicBanks::OnRoundStart"
+					"read"		"10"
+					"read"		"0"		// TheDirector
+					"read"		"1592"	// pDirectorScriptedEventManager. found from CFinaleTrigger::Spawn function. 
+					"offset"	"4"		// Found from CDirectorScriptedEventManager::ChangeFinaleStage function.
+				}
+			}
+
+			"PendingMobCount"
+			{
+				"windows"
+				{
+					"signature"	"InfoChangelevel::StartChangeLevel"
+					"read"		"293"
+					"read"		"0"
+					"offset"	"528"
+				}
+				"linux"
+				{
+					"signature" "InfoChangelevel::StartChangeLevel"
+					"read"		"263"
+					"read"		"0"		// TheZombieManager
+					"offset"	"528"	// Found from CDirector::ScriptGetPendingMobCount function.
+				}
+			}
+		}
+
+		"Signatures"
+		{
+			"ZombieManager::SpawnTank"
+			{
+				"library"	"server"
+				"linux"		"@_ZN13ZombieManager9SpawnTankERK6VectorRK6QAngle"
+				"windows"	"\x2A\x2A\x2A\x2A\x2A\x2A\x8B\x0D\x2A\x2A\x2A\x2A\xE8\x2A\x2A\x2A\x2A\x85\xC0\x78\x2A\x8B\x0D\x2A\x2A\x2A\x2A\x39\x2A\x2A\x2A\x2A\x2A\x7C\x2A\x33\x2A\x5F"
+				// ? ? ? ? ? ? 8B 0D ? ? ? ? E8 ? ? ? ? 85 C0 78 ? 8B 0D ? ? ? ? 39 ? ? ? ? ? 7C ? 33 ? 5F
+			}
+
+			"ZombieManager::SpawnWitch"
+			{
+				"library"	"server"
+				"linux"		"@_ZN13ZombieManager10SpawnWitchERK6VectorRK6QAngle"
+				"windows"	"\x55\x8B\xEC\x8B\x0D\x2A\x2A\x2A\x2A\xE8\x2A\x2A\x2A\x2A\x85\xC0\x78\x2A\x8B\x0D\x2A\x2A\x2A\x2A\x39\x81"
+				// 55 8B EC 8B 0D ? ? ? ? E8 ? ? ? ? 85 C0 78
+			}
+
+			"ZombieManager::SpawnSpecial"
+			{
+				"library"	"server"
+				"linux"		"@_ZN13ZombieManager12SpawnSpecialE15ZombieClassTypeRK6VectorRK6QAngle"
+				"windows"	"\x55\x8B\xEC\x53\x8B\x5D\x08\x8D\x43\xFF\x56"
+				// 55 8B EC 53 8B 5D 08 8D 43 FF 56
+			}
+
+			"CTerrorPlayer::SelectWeightedSequence"
+			{
+				"library"	"server"
+				"linux"		"@_ZN13CTerrorPlayer22SelectWeightedSequenceE8Activity"
+				"windows"	"\x55\x8B\xEC\x56\x57\x8B\x7D\x08\x8B\xF1\x81\xFF\x16\x03\x00\x00"
+				// 55 8B EC 56 57 8B 7D 08 8B F1 81 FF 16 03 00 00
+			}
+
+			"CTankRock::OnRelease"
+			{
+				"library"	"server"
+				"linux"		"@_ZN9CTankRock9OnReleaseERK6VectorRK6QAngleS2_S2_"
+				"windows"	"\x2A\x2A\x2A\x2A\x2A\x2A\x57\xC6\x86\x2A\x2A\x2A\x2A\x2A\xC7"
+				// ? ? ? ? ? ? 57 C6 86 ? ? ? ? ? C7
+			}
+
+			"BossZombiePlayerBot::ChooseVictim"
+			{
+				"library"		"server"
+				"linux"			"@_ZN19BossZombiePlayerBot12ChooseVictimEP13CTerrorPlayeriP20CBaseCombatCharacter"
+				"windows"		"\x2A\x2A\x2A\x2A\x2A\x2A\x2A\x2A\x2A\x2A\x2A\x83\x2A\x2A\x2A\x53\x8B\x2A\x8B\x2A\x2A\x2A\x2A\x2A\x8B\x2A\x2A\x2A\x2A\x2A\x56"
+				// ? ? ? ? ? ? ? ? ? ? ? 83 ? ? ? 53 8B ? 8B ? ? ? ? ? 8B ? ? ? ? ? 56
+			}
+
+			"CDirectorScriptedEventManager::ChangeFinaleStage"
+			{
+				"library"	"server"
+				"linux"		"@_ZN29CDirectorScriptedEventManager17ChangeFinaleStageENS_18ScriptedEventStageEPKc"
+				"windows"	"\x2A\x2A\x2A\x2A\x2A\x2A\x2A\x2A\x2A\x2A\x2A\x2A\x2A\x2A\x33\x2A\x89\x2A\x2A\x53\x8B\x2A\x2A\x56\x8B\x2A\x2A\x57\x53\x68"
+				// ? ? ? ? ? ? ? ? ? ? ? ? ? ? 33 ? 89 ? ? 53 8B ? ? 56 8B ? ? 57 53 68 // Wildcarded for 3rd party plugins
+			}
+
+			"ZombieManager::SpawnMob"
+			{
+				"library"	"server"
+				"linux"		"@_ZN13ZombieManager8SpawnMobEi"
+				"windows"	"\x55\x8B\xEC\xA1\x2A\x2A\x2A\x2A\xD9\x40\x0C\x83\xEC\x2A\x53\x56\x57"
+				// 55 8B EC A1 ? ? ? ? D9 40 0C 83 EC ? 53 56 57
+			}
+
+			"ZombieManager::GetRandomPZSpawnPosition"
+			{
+				"library"	"server"
+				"linux"		"@_ZNK13ZombieManager24GetRandomPZSpawnPositionE15ZombieClassTypeiP13CTerrorPlayerP6Vector"
+				"windows"	"\x55\x8B\x2A\x83\x2A\x2A\x53\x57\x8B\x2A\x2A\x8B\x2A\x89\x2A\x2A\x85\x2A\x75\x2A\x5F\x32"
+				// 55 8B ? 83 ? ? 53 57 8B ? ? 8B ? 89 ? ? 85 ? 75 ? 5F 32
+			}
+
+			"CTerrorPlayer::IsStaggering"
+			{
+				"library"	"server"
+				"linux"		"@_ZNK13CTerrorPlayer12IsStaggeringEv"
+				"windows"	"\x83\xB9\x2C\x32\x00\x00\xFF"
+				// 83 B9 2C 32 00 00 FF
+			}
+
+			"Music::Play"
+			{
+				"library"	"server"
+				"linux"		"@_ZN5Music4PlayEPKcifbb"
+				"windows"	"\x2A\x2A\x2A\x2A\x2A\x2A\x2A\x2A\x2A\xA1\x2A\x2A\x2A\x2A\x33\x2A\x89\x2A\x2A\xA1\x2A\x2A\x2A\x2A\x83\x2A\x2A\x00\x53\x8B\x2A\x2A\x56\x57"
+				// ? ? ? ? ? ? ? ? ? A1 ? ? ? ? 33 ? 89 ? ? A1 ? ? ? ? 83 ? ? 00 53 8B ? ? 56 57
+			}
+
+			"Music::StopPlaying"
+			{
+				"library"	"server"
+				"linux"		"@_ZN5Music11StopPlayingEPKcfb"
+				"windows"	"\x55\x8B\x2A\x83\x2A\x2A\xA1\x2A\x2A\x2A\x2A\x83\x2A\x2A\x00\x56\x8B\x2A\x89\x2A\x2A\x0F\x84\x2A\x01\x2A\x2A\x8B"
+				// 55 8B ? 83 ? ? A1 ? ? ? ? 83 ? ? 00 56 8B ? 89 ? ? 0F 84 ? 01 ? ? 8B
+			}
+
+
+			"CTerrorGameRules::IsGenericCooperativeMode"
+			{
+				"library"	"server"
+				"linux"		"@_ZN16CTerrorGameRules24IsGenericCooperativeModeEv"
+				"windows"	"\x2A\x2A\x2A\x2A\x2A\x2A\x2A\x75\x2A\xE8\x2A\x2A\x2A\x2A\x84\xC0\x75\x2A\x33\xC0\xC3\xB8\x01\x00\x00\x00\xC3\xCC\xCC\xCC\xCC\xCC\x8B"
+				// ? ? ? ? ? ? ? 75 ? E8 ? ? ? ? 84 C0 75 ? 33 C0 C3 B8 01 00 00 00 C3 CC CC CC CC CC 8B
+			}
+
+			"CBaseEntity::SetAbsOrigin"
+			{
+				"library"	"server"
+				"linux"		"@_ZN11CBaseEntity12SetAbsOriginERK6Vector"
+				"windows"	"\x55\x8B\xEC\x83\xEC\x44\xA1\x2A\x2A\x2A\x2A\x33\xC5\x89\x45\xFC\x56\x57"
+				// 55 8B EC 83 EC 44 A1 ? ? ? ? 33 C5 89 45 FC 56 57
+			}
+
+			"CBaseEntity::SetAbsVelocity"
+			{
+				"library"	"server"
+				"linux"		"@_ZN11CBaseEntity14SetAbsVelocityERK6Vector"
+				"windows"	"\x55\x8B\xEC\x83\xEC\x18\x56\x8B\x75\x08\xF3\x0F\x10\x06"
+				// 55 8B EC 83 EC 18 56 8B 75 08 F3 0F 10 06
+			}
+
+			"CBaseEntity::SetAbsAngles"
+			{
+				"library"	"server"
+				"linux"		"@_ZN11CBaseEntity12SetAbsAnglesERK6QAngle"
+				"windows"	"\x55\x8B\xEC\x83\xEC\x74\xA1\x2A\x2A\x2A\x2A\x33\xC5\x89\x45\xFC\x56\x57"
+				// 55 8B EC 83 EC 74 A1 ? ? ? ? 33 C5 89 45 FC 56 57
+			}
+
+			"SurvivorBot::SetHumanSpectator"
+			{
+				"library"	"server"
+				"linux"		"@_ZN11SurvivorBot17SetHumanSpectatorEP13CTerrorPlayer"
+				"windows"	"\x2A\x2A\x2A\x2A\x2A\x2A\x83\xBE\x2A\x2A\x2A\x2A\x00\x7E\x07\x32\xC0\x5E\x5D\xC2\x04\x00\x8B\x0D"
+				// ? ? ? ? ? ? 83 BE ? ? ? ? 00 7E 07 32 C0 5E 5D C2 04 00 8B 0D
+			}
+
+			"CTerrorPlayer::TakeOverBot"
+			{
+				"library"	"server"
+				"linux"		"@_ZN13CTerrorPlayer11TakeOverBotEb"
+				"windows"	"\x55\x8B\xEC\x81\xEC\x2A\x2A\x2A\x2A\xA1\x2A\x2A\x2A\x2A\x33\xC5\x89\x45\xFC\x53\x56\x8D\x85"
+				// 55 8B EC 81 EC ? ? ? ? A1 ? ? ? ? 33 C5 89 45 FC 53 56 8D 85
+			}
+
+			"CCSPlayer::State_Transition"
+			{
+				"library"	"server"
+				"linux"		"@_ZN9CCSPlayer16State_TransitionE13CSPlayerState"
+				"windows"	"\x55\x8B\xEC\x56\x8B\xF1\x8B\x86\x2A\x2A\x2A\x2A\x57\x8B\x7D\x2A\x85\xC0\x74\x2A\x83"
+				// 55 8B EC 56 8B F1 8B 86 ? ? ? ? 57 8B 7D ? 85 C0 74 ? 83
+			}
+
+			"UTIL_Remove"
+			{
+				"library"	"server"
+				"linux"		"@_Z11UTIL_RemoveP11CBaseEntity"
+				"windows"	"\x55\x8B\xEC\x8B\x45\x08\x85\xC0\x74\x2A\x83\xC0\x2A\x50\xE8"
+			}
+
+			"CTerrorPlayer::TakeOverZombieBot"
+			{
+				"library"	"server"
+				"linux"		"@_ZN13CTerrorPlayer17TakeOverZombieBotEPS_"
+				"windows"	"\x55\x8B\xEC\x81\xEC\x2A\x2A\x2A\x2A\xA1\x2A\x2A\x2A\x2A\x33\xC5\x89\x45\x2A\x53\x8B\x5D\x2A\x80"
+				// 55 8B EC 81 EC ? ? ? ? A1 ? ? ? ? 33 C5 89 45 ? 53 8B 5D ? 80
+			}
+
+			"CTerrorPlayer::SetClass"
+			{
+				"library"	"server"
+				"linux"		"@_ZN13CTerrorPlayer8SetClassE15ZombieClassType"
+				"windows"	"\x55\x8B\x2A\x56\x8B\x2A\xE8\x2A\x2A\x2A\x2A\x83\x2A\x2A\x0F\x85\x2A\x2A\x2A\x2A\xA1\x2A\x2A\x2A\x2A\x40\xA3"
+				// 55 8B ? 56 8B ? E8 ? ? ? ? 83 ? ? 0F 85 ? ? ? ? A1 ? ? ? ? 40 A3
+			}
+
+			"CBaseAbility::CreateForPlayer"
+			{
+				"library"	"server"
+				"linux"		"@_ZN12CBaseAbility15CreateForPlayerEP13CTerrorPlayer"
+				"windows"	"\x55\x8B\x2A\x83\x2A\x2A\x56\x8B\x2A\x2A\x85\x2A\x0F\x84\x2A\x2A\x2A\x2A\x8B\x2A\xE8\x2A\x2A\x2A\x2A\x83"
+				// 55 8B ? 83 ? ? 56 8B ? ? 85 ? 0F 84 ? ? ? ? 8B ? E8 ? ? ? ? 83
+			}
+
+			"CDirector::IsFirstMapInScenario"
+			{
+				"library"	"server"
+				"linux"		"@_ZNK9CDirector20IsFirstMapInScenarioEv"
+				"windows"	"\xA1\x2A\x2A\x2A\x2A\x8B\x40\x3C\x56\x8B\xF0"
+				// A1 ? ? ? ? 8B 40 3C 56 8B F0
+			}
+
+			"CTerrorGameRules::IsMissionFinalMap"
+			{
+				"library"	"server"
+				"linux"		"@_ZN16CTerrorGameRules17IsMissionFinalMapEv"
+				"windows"	"\x8B\x0D\x2A\x2A\x2A\x2A\x8B\x01\x8B\x50\x28\x56\xFF\xD2\x8B\x10\x8B\xC8\x8B\x42\x04\x6A\x00\xFF\xD0\x8B\xF0\x85\xF6\x75\x04\xB0"
+				// 8B 0D ? ? ? ? 8B 01 8B 50 28 56 FF D2 8B 10 8B C8 8B 42 04 6A 00 FF D0 8B F0 85 F6 75 04 B0
+			}
+
+			"Script_GetMaxFlowDistance"
+			{
+				"library"	"server"
+				"linux"		"@_ZL25Script_GetMaxFlowDistancev"
+				"windows"	"\xA1\x2A\x2A\x2A\x2A\xD9\x80\xF8\x05\x00\x00"
+				// A1 ? ? ? ? D9 80 F8 05 00 00
+			}
+
+			"CTerrorPlayer::GetFlowDistance"
+			{
+				"library"	"server"
+				"linux"		"@_ZNK13CTerrorPlayer15GetFlowDistanceEN13TerrorNavArea8FlowTypeE"
+				"windows"	"\x55\x8B\x2A\x8B\x2A\x8B\x2A\x2A\x2A\x2A\x2A\x2A\x2A\x85\x2A\x74"
+				// 55 8B ? 8B ? 8B ? ? ? ? ? ? ? 85 ? 74
+			}
+
+			"CDirectorTacticalServices::GetHighestFlowSurvivor"
+			{
+				"library"	"server"
+				"linux"		"@_ZNK25CDirectorTacticalServices22GetHighestFlowSurvivorEN13TerrorNavArea8FlowTypeE"
+				"windows"	"\x55\x8B\x2A\x83\x2A\x2A\xF3\x0F\x2A\x2A\x2A\x2A\x2A\x2A\x33\x2A\x89\x2A\x2A\x89\x2A\x2A\x89"
+				// 55 8B ? 83 ? ? F3 0F ? ? ? ? ? ? 33 ? 89 ? ? 89 ? ? 89
+			}
+
+			"CDirector::GetFurthestSurvivorFlow"
+			{
+				"library"	"server"
+				"linux"		"@_ZNK9CDirector23GetFurthestSurvivorFlowEv"
+				"windows"	"\xD9\x81\x4C\x02\x00\x00\xC3"
+				// D9 81 4C 02 00 00 C3
+			}
+
+			"CTerrorPlayer::ScriptReviveByDefibrillator"
+			{
+				"library"	"server"
+				"linux"		"@_ZN13CTerrorPlayer27ScriptReviveByDefibrillatorEv"
+				"windows"	"\x55\x8B\xEC\x83\xEC\x0C\x57\x33\xFF\x89\x4D\xFC"
+				// 55 8B EC 83 EC 0C 57 33 FF 89 4D FC
+			}
+
+			"CDirector::GetScriptValueInt"
+			{
+				"library"	"server"
+				"linux"		"@_ZN9CDirector14GetScriptValueEPKci"
+				"windows"	"\x55\x8B\xEC\x8B\x81\xB8\x04\x00\x00\x83\xEC\x10\x83\xF8\xFF\x74\x2A\x8B\x0D\x2A\x2A\x2A\x2A\x85\xC9\x74\x2A\x56\x33\xD2\x8D\x75\xF0\x56\x8B\x75\x08\x66\x89\x55\xF8\x66\x89\x55\xFA\x89\x55\xF0\x8B\x11\x56\x50\x8B\x82\x94\x00\x00\x00\xFF\xD0\x5E\x84\xC0\x74\x2A\x8D\x4D\x0C\x51\x8D\x4D\xF0\xE8\x2A\x2A\x2A\x2A\x84\xC0\x75\x2A\x8B\x0D\x2A\x2A\x2A\x2A\x8B\x11\x8B\x92\x9C\x00\x00\x00\x8D\x45\xF0\x50\xFF\xD2\xF6\x45\xFA\x01\x74\x2A\xA1\x2A\x2A\x2A\x2A\x8B\x08\x8B\x11\x8B\x45\xF0\x8B\x52\x14\x50\xFF\xD2\x8B\x45\x0C"
+				// 55 8B EC 8B 81 B8 04 00 00 83 EC 10 83 F8 FF 74 ? 8B 0D ? ? ? ? 85 C9 74 ? 56 33 D2 8D 75 F0 56 8B 75 08 66 89 55 F8 66 89 55 FA 89 55 F0 8B 11 56 50 8B 82 94 00 00 00 FF D0 5E 84 C0 74 ? 8D 4D 0C 51 8D 4D F0 E8 ? ? ? ? 84 C0 75 ? 8B 0D ? ? ? ? 8B 11 8B 92 9C 00 00 00 8D 45 F0 50 FF D2 F6 45 FA 01 74 ? A1 ? ? ? ? 8B 08 8B 11 8B 45 F0 8B 52 14 50 FF D2 8B 45 0C
+			}
+
+			"CDirector::GetScriptValueFloat"
+			{
+				"library"	"server"
+				"linux"		"@_ZN9CDirector14GetScriptValueEPKcf"
+				"windows"	"\x55\x8B\xEC\x8B\x81\xB8\x04\x00\x00\x83\xEC\x10\x83\xF8\xFF\x74\x2A\x8B\x0D\x2A\x2A\x2A\x2A\x85\xC9\x74\x2A\x56\x33\xD2\x8D\x75\xF0\x56\x8B\x75\x08\x66\x89\x55\xF8\x66\x89\x55\xFA\x89\x55\xF0\x8B\x11\x56\x50\x8B\x82\x94\x00\x00\x00\xFF\xD0\x5E\x84\xC0\x74\x2A\x8D\x4D\x0C\x51\x8D\x4D\xF0\xE8\x2A\x2A\x2A\x2A\x84\xC0\x75\x2A\x8B\x0D\x2A\x2A\x2A\x2A\x8B\x11\x8B\x92\x9C\x00\x00\x00\x8D\x45\xF0\x50\xFF\xD2\xF6\x45\xFA\x01\x74\x2A\xA1\x2A\x2A\x2A\x2A\x8B\x08\x8B\x11\x8B\x45\xF0\x8B\x52\x14\x50\xFF\xD2\xD9\x45\x0C"
+				// 55 8B EC 8B 81 B8 04 00 00 83 EC 10 83 F8 FF 74 ? 8B 0D ? ? ? ? 85 C9 74 ? 56 33 D2 8D 75 F0 56 8B 75 08 66 89 55 F8 66 89 55 FA 89 55 F0 8B 11 56 50 8B 82 94 00 00 00 FF D0 5E 84 C0 74 ? 8D 4D 0C 51 8D 4D F0 E8 ? ? ? ? 84 C0 75 ? 8B 0D ? ? ? ? 8B 11 8B 92 9C 00 00 00 8D 45 F0 50 FF D2 F6 45 FA 01 74 ? A1 ? ? ? ? 8B 08 8B 11 8B 45 F0 8B 52 14 50 FF D2 D9 45 0C
+			}
+
+			"InfoChangelevel::StartChangeLevel"
+			{
+				"library"	"server"
+				"linux"		"@_ZN15InfoChangelevel16StartChangeLevelEPK10Checkpoint"
+				"windows"	"\x55\x8B\xEC\xA1\x2A\x2A\x2A\x2A\x83\x78\x30\x00\x56\x8B\xF1\x74\x2A"
+				// 55 8B EC A1 ? ? ? ? 83 78 30 00 56 8B F1 74 ?
+			}
+
+			"CDirectorMusicBanks::OnRoundStart"
+			{
+				"library"	"server"
+				"linux"		"@_ZN19CDirectorMusicBanks12OnRoundStartEv"
+				"windows"	"\x55\x8B\xEC\x83\xEC\x2A\x56\x57\x8B\xF9\x8B\x0D\x2A\x2A\x2A\x2A\xE8\x2A\x2A\x2A\x2A\x84\xC0\x0F"
+				// 55 8B EC 83 EC ? 56 57 8B F9 8B 0D ? ? ? ? E8 ? ? ? ? 84 C0 0F
+			}
+		}
+	}
+}
