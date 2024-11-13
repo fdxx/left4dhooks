@@ -1,4 +1,4 @@
-set_languages("c11", "cxx17")
+set_languages("cxx17")
 set_arch("x86")
 option("SMPATH")
 option("HL2SDKPATH")
@@ -8,13 +8,7 @@ option("DEBUG")
 target("safetyhook")
     set_kind("static")
 	add_files(
-		"$(SAFETYHOOKPATH)/src/utility.cpp",
-		"$(SAFETYHOOKPATH)/src/os.$(host).cpp",
-		"$(SAFETYHOOKPATH)/src/vmt_hook.cpp",
-		"$(SAFETYHOOKPATH)/src/mid_hook.cpp",
-		"$(SAFETYHOOKPATH)/src/easy.cpp",
-		"$(SAFETYHOOKPATH)/src/inline_hook.cpp",
-		"$(SAFETYHOOKPATH)/src/allocator.cpp",
+		"$(SAFETYHOOKPATH)/src/*.cpp",
 		"$(SAFETYHOOKPATH)/zydis/Zydis.c")
 
 	add_includedirs(
@@ -25,12 +19,12 @@ target("safetyhook")
 
 	if is_plat("windows") then
 		set_toolchains("msvc")
-		add_cxflags("/W3", "/permissive-", "/w14640", "/wd4819", "/Ox", "/Oy-", "/EHsc", "/MT", "/Z7")
+		add_cxflags("/W3", "/w14640", "/wd4819", "/Ox", "/Oy-", "/EHsc", "/MT", "/Z7")
 	else
 		set_toolchains("clang")
 		add_cxflags(
 			"-Wall", "-Wextra",
-			"-Wshadow", "-pedantic",
+			"-Wshadow",
 			"-Wnon-virtual-dtor",
 			"-Wno-unused-const-variable",
 			"-Wno-unused-function",
@@ -142,7 +136,7 @@ target("left4dhooks")
 
 		add_linkdirs("$(HL2SDKPATH)/lib/linux");
 		add_links("$(HL2SDKPATH)/lib/linux/tier1_i486.a", "$(HL2SDKPATH)/lib/linux/mathlib_i486.a", "vstdlib_srv", "tier0_srv")
-		add_shflags("-static-libstdc++")
+		add_shflags("-static-libstdc++", "-static-libgcc")
 	end
 	
 	after_build(function (target)
