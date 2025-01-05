@@ -3,17 +3,18 @@ set_arch("x86")
 option("SMPATH")
 option("HL2SDKPATH")
 option("SAFETYHOOKPATH")
-option("DEBUG")
 
 target("safetyhook")
     set_kind("static")
 	add_files(
 		"$(SAFETYHOOKPATH)/src/*.cpp",
-		"$(SAFETYHOOKPATH)/zydis/Zydis.c")
+		"$(SAFETYHOOKPATH)/zydis/Zydis.c"
+	)
 
 	add_includedirs(
 		"$(SAFETYHOOKPATH)/include",
-		"$(SAFETYHOOKPATH)/zydis")
+		"$(SAFETYHOOKPATH)/zydis"
+	)
 
 	add_defines("NDEBUG")
 
@@ -30,20 +31,20 @@ target("safetyhook")
 			"-Wno-unused-function",
 			"-fvisibility=hidden", 
 			"-fvisibility-inlines-hidden", 
-			"-fPIC", "-O3", "-g3")
+			"-flto", "-O2", "-g3"
+		)
 	end
 
 target("left4dhooks")
 	set_kind("shared")
+	add_deps("safetyhook")
 	set_prefixname("")
 	set_suffixname(".ext")
-	add_deps("safetyhook")
 	
 	add_files(
-		"extension/main.cpp",
-		"extension/forward.cpp",
-		"extension/natives.cpp",
-		"$(SMPATH)/public/smsdk_ext.cpp")
+		"extension/*.cpp",
+		"$(SMPATH)/public/smsdk_ext.cpp"
+	)
 
 	add_includedirs(
 		"extension",
@@ -58,7 +59,8 @@ target("left4dhooks")
 		"$(HL2SDKPATH)/public/tier0",
 		"$(HL2SDKPATH)/public/tier1",
 		"$(HL2SDKPATH)/public/engine",
-		"$(HL2SDKPATH)/public/mathlib")
+		"$(HL2SDKPATH)/public/mathlib"
+	)
 
 	add_defines(
 		"SE_EPISODEONE=1",
@@ -86,13 +88,11 @@ target("left4dhooks")
 		"SE_CSGO=23",
 		"SE_DOTA=24",
 		"SE_CS2=25",
-		"SE_MOCK=26")
+		"SE_MOCK=26"
+	)
 	
 	add_defines("SOURCE_ENGINE=16")
 	add_defines("NDEBUG")
-	if has_config("DEBUG") then
-		add_cxflags("-UNDEBUG")
-	end
 
 	if is_plat("windows") then
 		set_toolchains("msvc")
@@ -104,7 +104,7 @@ target("left4dhooks")
 		add_shflags("/DEBUG") --Always generate pdb files
 		add_shflags("/OPT:ICF", "/OPT:REF")
 		add_linkdirs("$(HL2SDKPATH)/lib/public");
-		add_links("mathlib", "tier0", "tier1", "vstdlib", "kernel32", "legacy_stdio_definitions")
+		add_links("tier0", "vstdlib", "kernel32", "legacy_stdio_definitions")
 		
 	else
 		set_toolchains("clang")
@@ -118,7 +118,8 @@ target("left4dhooks")
 			"strnicmp=strncasecmp ",
 			"_snprintf=snprintf",
 			"_vsnprintf=vsnprintf",
-			"_alloca=alloca")
+			"_alloca=alloca"
+		)
 		add_cxflags(
 			"-Wall", 
 			"-Wshadow",
@@ -132,11 +133,12 @@ target("left4dhooks")
 			"-fno-exceptions", 
 			"-fvisibility=hidden", 
 			"-fvisibility-inlines-hidden", 
-			"-fPIC", "-O3", "-g3")
+			"-flto", "-fPIC", "-O2", "-g3"
+		)
 
 		add_linkdirs("$(HL2SDKPATH)/lib/linux");
-		add_links("$(HL2SDKPATH)/lib/linux/tier1_i486.a", "$(HL2SDKPATH)/lib/linux/mathlib_i486.a", "vstdlib_srv", "tier0_srv")
-		add_shflags("-static-libstdc++", "-static-libgcc")
+		add_links("tier0_srv", "vstdlib_srv")
+		add_shflags("-fuse-ld=lld", "-flto", "-static-libstdc++", "-static-libgcc")
 	end
 	
 	after_build(function (target)
@@ -148,4 +150,5 @@ target("left4dhooks")
 		os.cp("pawn/left4dhooks.inc", "release/addons/sourcemod/scripting/include")
 		os.cp("pawn/left4dhooks.ext.txt", "release/addons/sourcemod/gamedata")
     end)
+
 

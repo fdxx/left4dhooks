@@ -1,8 +1,8 @@
-#include "IForwardSys.h"
-#include "extension.h"
-#include "safetyhook.hpp"
-#include "sp_typeutil.h"
-#include "vector.h"
+#include <IForwardSys.h>
+#include <sp_typeutil.h>
+#include <mathlib/vector.h>
+#include <safetyhook.hpp>
+#include "left4dhooks.h"
 
 static SafetyHookInline g_hook_SpawnTank{};
 static SafetyHookInline g_hook_SpawnWitch{};
@@ -186,7 +186,6 @@ static int g_hThrower_offset;
 void CTankRockExt::OnRelease(Vector &vecPos, QAngle &vecAng, Vector &vecVel, Vector &vecRot)
 {
 	edict_t *pThrower = gamehelpers->GetHandleEntity(*(CBaseHandle*)((char*)this + g_hThrower_offset));
-	assert(pThrower);
 
 	int tank = gamehelpers->IndexOfEdict(pThrower);
 	int rock = gamehelpers->EntityToBCompatRef((CBaseEntity*)this);

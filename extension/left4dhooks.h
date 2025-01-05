@@ -1,6 +1,6 @@
 #pragma once
 
-#include "smsdk_ext.h"
+#include <smsdk_ext.h>
 
 class left4dhooks : public SDKExtension
 {

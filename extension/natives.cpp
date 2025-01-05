@@ -1,11 +1,12 @@
-#include "extension.h"
-#include "sp_vm_types.h"
-#include "vector.h"
-#include "safetyhook/common.hpp"
-#include "basehandle.h"
-#include "iservernetworkable.h"
-#include "iserverunknown.h"
-#include <cassert>
+#include <IForwardSys.h>
+#include <sp_typeutil.h>
+#include <sp_vm_types.h>
+#include <mathlib/vector.h>
+#include <basehandle.h>
+#include <iservernetworkable.h>
+#include <iserverunknown.h>
+#include <safetyhook/common.hpp>
+#include "left4dhooks.h"
 
 
 class ZombieManagerExt
@@ -296,11 +297,9 @@ static void SetClass(CBaseEntity *pClient, int zombieClass)
 	CTerrorPlayerSetClass(pClient, zombieClass);
 
 	CBaseEntity *pNewAbility = CBaseAbilityCreateForPlayer(pClient);
-	assert(pNewAbility);
 	hndl.Set((IHandleEntity*)pNewAbility);
 	
 	edict_t *pEdict = ((IServerUnknown*)pClient)->GetNetworkable()->GetEdict();
-	assert(pEdict);
 	gamehelpers->SetEdictStateChanged(pEdict, g_customAbility_offset);
 }
 
@@ -325,9 +324,6 @@ static cell_t L4D_TakeOverZombieBot(IPluginContext *pContext, const cell_t *para
 	CBaseEntity *pClient = gamehelpers->ReferenceToEntity(params[1]);
 	CBaseEntity *pTarget = gamehelpers->ReferenceToEntity(params[2]);
 	uint8_t zombieClass = *(uint8_t*)((char*)pTarget + g_zombieClass_offset);
-
-	assert(zombieClass > 0 && zombieClass < 9);
-	assert(pTarget);
 
 	CTerrorPlayerTakeOverZombieBot(pClient, pTarget);
 	SetClass(pClient, zombieClass);

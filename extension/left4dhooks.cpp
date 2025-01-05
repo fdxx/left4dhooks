@@ -1,7 +1,4 @@
-
-#include <stdio.h>
-#include <string.h>
-#include "extension.h"
+#include "left4dhooks.h"
 
 left4dhooks g_left4dhooks;
 SMEXT_LINK(&g_left4dhooks);
