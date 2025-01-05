@@ -15,10 +15,10 @@ bool left4dhooks::SDK_OnLoad( char *error, size_t maxlength, bool late )
 		return false;
 	}
 
-	if (!PrepForward(gamedata, error, maxlength))
+	if (!PrepForward(gamedata))
 		return false;
 
-	if (!PrepNatives(gamedata, error, maxlength))
+	if (!PrepNatives(gamedata))
 		return false;
 	
 	sharesys->RegisterLibrary(myself, "left4dhooks");
