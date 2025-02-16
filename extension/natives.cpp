@@ -1,11 +1,13 @@
-#include "extension.h"
-#include "sp_vm_types.h"
-#include "vector.h"
-#include "safetyhook/common.hpp"
-#include "basehandle.h"
-#include "iservernetworkable.h"
-#include "iserverunknown.h"
-#include <cassert>
+#include <IForwardSys.h>
+#include <cstdio>
+#include <sp_typeutil.h>
+#include <sp_vm_types.h>
+#include <mathlib/vector.h>
+#include <basehandle.h>
+#include <iservernetworkable.h>
+#include <iserverunknown.h>
+#include <safetyhook/common.hpp>
+#include "left4dhooks.h"
 
 
 class ZombieManagerExt
@@ -78,8 +80,7 @@ static cell_t L4D2_SpawnSpecial(IPluginContext *pContext, const cell_t *params)
 }
 
 
-using fnGetRandomPZSpawnPosition = bool (SAFETYHOOK_THISCALL *)(ZombieManagerExt*, int, int, CBaseEntity*, Vector*);
-static fnGetRandomPZSpawnPosition GetRandomPZSpawnPosition;
+static bool (SAFETYHOOK_THISCALL *GetRandomPZSpawnPosition)(ZombieManagerExt*, int, int, CBaseEntity*, Vector*);
 // bool ZombieManager::GetRandomPZSpawnPosition(ZombieClassType, int, CTerrorPlayer*, Vector*)
 // native bool L4D_GetRandomPZSpawnPosition(int client, int zombieClass, int attempts, float vecPos[3]);
 static cell_t L4D_GetRandomPZSpawnPosition(IPluginContext *pContext, const cell_t *params)
@@ -103,8 +104,7 @@ static cell_t L4D_GetRandomPZSpawnPosition(IPluginContext *pContext, const cell_
 
 
 
-using fnCTerrorPlayerIsStaggering = bool (SAFETYHOOK_THISCALL *)(CBaseEntity*);
-static fnCTerrorPlayerIsStaggering CTerrorPlayerIsStaggering;
+static bool (SAFETYHOOK_THISCALL *CTerrorPlayerIsStaggering)(CBaseEntity*);
 // bool CTerrorPlayer::IsStaggering()
 // native bool L4D_IsPlayerStaggering(int client)
 static cell_t L4D_IsPlayerStaggering(IPluginContext *pContext, const cell_t *params)
@@ -114,8 +114,7 @@ static cell_t L4D_IsPlayerStaggering(IPluginContext *pContext, const cell_t *par
 
 
 
-using fnMusicPlay = void (SAFETYHOOK_THISCALL *)(void*, const char*, int, float, bool, bool);
-static fnMusicPlay MusicPlay;
+static void (SAFETYHOOK_THISCALL *MusicPlay)(void*, const char*, int, float, bool, bool);
 static int g_PlayerMusic_offset;
 // void Music::Play(char const*, int, float, bool, bool)
 // native void L4D_PlayMusic(int client, const char[] music_str, int source_ent = 0, float one_float, bool one_bool, bool two_bool);
@@ -136,8 +135,7 @@ static cell_t L4D_PlayMusic(IPluginContext *pContext, const cell_t *params)
 }
 
 
-using fnMusicStopPlaying = void (SAFETYHOOK_THISCALL *)(void*, const char*, float, bool);
-static fnMusicStopPlaying MusicStopPlaying;
+static void (SAFETYHOOK_THISCALL *MusicStopPlaying)(void*, const char*, float, bool);
 // void Music::StopPlaying(char const*, float, bool)
 // native void L4D_StopMusic(int client, const char[] music_str, float one_float = 0.0, bool one_bool = false);
 static cell_t L4D_StopMusic(IPluginContext *pContext, const cell_t *params)
@@ -154,8 +152,7 @@ static cell_t L4D_StopMusic(IPluginContext *pContext, const cell_t *params)
 	return 0;
 }
 
-using fnIsGenericCooperativeMode = bool (SAFETYHOOK_CCALL *)();
-static fnIsGenericCooperativeMode IsGenericCooperativeMode;
+static bool (SAFETYHOOK_CCALL *IsGenericCooperativeMode)();
 // bool CTerrorGameRules::IsGenericCooperativeMode()
 // native bool L4D2_IsGenericCooperativeMode();
 static cell_t L4D2_IsGenericCooperativeMode(IPluginContext *pContext, const cell_t *params)
@@ -164,8 +161,7 @@ static cell_t L4D2_IsGenericCooperativeMode(IPluginContext *pContext, const cell
 }
 
 
-using fnCBaseEntitySetAbsOrigin = void (SAFETYHOOK_THISCALL *)(CBaseEntity*, const Vector&);
-static fnCBaseEntitySetAbsOrigin CBaseEntitySetAbsOrigin;
+static void (SAFETYHOOK_THISCALL *CBaseEntitySetAbsOrigin)(CBaseEntity*, const Vector&);
 // The hl2sdk-l4d2 has implementation, but for correctness...
 // void CBaseEntity::SetAbsOrigin( const Vector& absOrigin )
 // native void SetAbsOrigin(int entity, const float vec[3])
@@ -182,8 +178,7 @@ static cell_t SetAbsOrigin(IPluginContext *pContext, const cell_t *params)
 }
 
 
-using fnCBaseEntitySetAbsAngles = void (SAFETYHOOK_THISCALL *)(CBaseEntity*, const QAngle&);
-static fnCBaseEntitySetAbsAngles CBaseEntitySetAbsAngles;
+static void (SAFETYHOOK_THISCALL *CBaseEntitySetAbsAngles)(CBaseEntity*, const QAngle&);
 // void CBaseEntity::SetAbsAngles( const QAngle& absAngles )
 // native void SetAbsAngles(int entity, const float vec[3])
 static cell_t SetAbsAngles(IPluginContext *pContext, const cell_t *params)
@@ -199,8 +194,7 @@ static cell_t SetAbsAngles(IPluginContext *pContext, const cell_t *params)
 }
 
 
-using fnCBaseEntitySetAbsVelocity = void (SAFETYHOOK_THISCALL *)(CBaseEntity*, const Vector&);
-static fnCBaseEntitySetAbsVelocity CBaseEntitySetAbsVelocity;
+static void (SAFETYHOOK_THISCALL *CBaseEntitySetAbsVelocity)(CBaseEntity*, const Vector&);
 // void CBaseEntity::SetAbsVelocity( const Vector& vecAbsVelocity )
 // native void SetAbsVelocity(int entity, const float vec[3])
 static cell_t SetAbsVelocity(IPluginContext *pContext, const cell_t *params)
@@ -216,8 +210,7 @@ static cell_t SetAbsVelocity(IPluginContext *pContext, const cell_t *params)
 }
 
 
-using fnSurvivorBotSetHumanSpectator = bool (SAFETYHOOK_THISCALL *)(CBaseEntity*, CBaseEntity*);
-static fnSurvivorBotSetHumanSpectator SurvivorBotSetHumanSpectator;
+static bool (SAFETYHOOK_THISCALL *SurvivorBotSetHumanSpectator)(CBaseEntity*, CBaseEntity*);
 // bool SurvivorBot::SetHumanSpectator(CTerrorPlayer *)
 // native bool L4D_SetHumanSpec(int bot, int client);
 static cell_t L4D_SetHumanSpec(IPluginContext *pContext, const cell_t *params)
@@ -228,8 +221,7 @@ static cell_t L4D_SetHumanSpec(IPluginContext *pContext, const cell_t *params)
 }
 
 
-using fnCTerrorPlayerTakeOverBot = bool (SAFETYHOOK_THISCALL *)(CBaseEntity*, bool);
-static fnCTerrorPlayerTakeOverBot CTerrorPlayerTakeOverBot;
+static bool (SAFETYHOOK_THISCALL *CTerrorPlayerTakeOverBot)(CBaseEntity*, bool);
 // bool CTerrorPlayer::TakeOverBot(bool bIgnoreTeam)
 // native bool L4D_TakeOverBot(int client);
 static cell_t L4D_TakeOverBot(IPluginContext *pContext, const cell_t *params)
@@ -239,8 +231,7 @@ static cell_t L4D_TakeOverBot(IPluginContext *pContext, const cell_t *params)
 }
 
 
-using fnCCSPlayerStateTransition = void (SAFETYHOOK_THISCALL *)(CBaseEntity*, int);
-static fnCCSPlayerStateTransition CCSPlayerStateTransition;
+static void (SAFETYHOOK_THISCALL *CCSPlayerStateTransition)(CBaseEntity*, int);
 // void CCSPlayer::State_Transition(CSPlayerState)
 // native void L4D_State_Transition(int client, any state);
 static cell_t L4D_State_Transition(IPluginContext *pContext, const cell_t *params)
@@ -263,19 +254,16 @@ static fnRemovePlayerItem RemovePlayerItem;
 static int g_RemovePlayerItem_vtableidx;
 
 //void UTIL_Remove( CBaseEntity *oldObj );
-using fnUTIL_Remove = void (SAFETYHOOK_CCALL *)(CBaseEntity*);
-static fnUTIL_Remove UTIL_Remove;
+static void (SAFETYHOOK_CCALL *UTIL_Remove)(CBaseEntity*);
 static int g_customAbility_offset;
 
 // void CTerrorPlayer::SetClass(ZombieClassType)
 // native void L4D_SetClass(int client, int zombieClass);
-using fnCTerrorPlayerSetClass = void (SAFETYHOOK_THISCALL *)(CBaseEntity*, int);
-static fnCTerrorPlayerSetClass CTerrorPlayerSetClass;
+static void (SAFETYHOOK_THISCALL *CTerrorPlayerSetClass)(CBaseEntity*, int);
 
 // CBaseEntity* CBaseAbility::CreateForPlayer(CTerrorPlayer*)
 // On Windows, "CTerrorPlayer*" is unused, and the "this" parameter degenerates to cdecl pushed on the stack
-using fnCBaseAbilityCreateForPlayer = CBaseEntity* (SAFETYHOOK_CCALL *)(CBaseEntity*);
-static fnCBaseAbilityCreateForPlayer CBaseAbilityCreateForPlayer;
+static CBaseEntity* (SAFETYHOOK_CCALL *CBaseAbilityCreateForPlayer)(CBaseEntity*);
 
 static void SetClass(CBaseEntity *pClient, int zombieClass)
 {
@@ -296,11 +284,9 @@ static void SetClass(CBaseEntity *pClient, int zombieClass)
 	CTerrorPlayerSetClass(pClient, zombieClass);
 
 	CBaseEntity *pNewAbility = CBaseAbilityCreateForPlayer(pClient);
-	assert(pNewAbility);
 	hndl.Set((IHandleEntity*)pNewAbility);
 	
 	edict_t *pEdict = ((IServerUnknown*)pClient)->GetNetworkable()->GetEdict();
-	assert(pEdict);
 	gamehelpers->SetEdictStateChanged(pEdict, g_customAbility_offset);
 }
 
@@ -315,8 +301,7 @@ static cell_t L4D_SetClass(IPluginContext *pContext, const cell_t *params)
 }
 
 
-using fnCTerrorPlayerTakeOverZombieBot = void (SAFETYHOOK_THISCALL *)(CBaseEntity*, CBaseEntity*);
-static fnCTerrorPlayerTakeOverZombieBot CTerrorPlayerTakeOverZombieBot;
+static void (SAFETYHOOK_THISCALL *CTerrorPlayerTakeOverZombieBot)(CBaseEntity*, CBaseEntity*);
 static int g_zombieClass_offset;
 // void CTerrorPlayer::TakeOverZombieBot(CTerrorPlayer*)
 // native void L4D_TakeOverZombieBot(int client, int target);
@@ -326,16 +311,12 @@ static cell_t L4D_TakeOverZombieBot(IPluginContext *pContext, const cell_t *para
 	CBaseEntity *pTarget = gamehelpers->ReferenceToEntity(params[2]);
 	uint8_t zombieClass = *(uint8_t*)((char*)pTarget + g_zombieClass_offset);
 
-	assert(zombieClass > 0 && zombieClass < 9);
-	assert(pTarget);
-
 	CTerrorPlayerTakeOverZombieBot(pClient, pTarget);
 	SetClass(pClient, zombieClass);
 	return 0;
 }
 
-using fnCDirectorIsFirstMapInScenario = bool (SAFETYHOOK_THISCALL *)(void*);
-static fnCDirectorIsFirstMapInScenario CDirectorIsFirstMapInScenario;
+static bool (SAFETYHOOK_THISCALL *CDirectorIsFirstMapInScenario)(void*);
 // bool CDirector::IsFirstMapInScenario()
 // native bool L4D_IsFirstMapInScenario();
 static cell_t L4D_IsFirstMapInScenario(IPluginContext *pContext, const cell_t *params)
@@ -343,8 +324,7 @@ static cell_t L4D_IsFirstMapInScenario(IPluginContext *pContext, const cell_t *p
 	return CDirectorIsFirstMapInScenario(TheDirector);
 }
 
-using fnCTerrorGameRulesIsMissionFinalMap = bool (SAFETYHOOK_CCALL *)();
-static fnCTerrorGameRulesIsMissionFinalMap CTerrorGameRulesIsMissionFinalMap;
+static bool (SAFETYHOOK_CCALL *CTerrorGameRulesIsMissionFinalMap)();
 // bool CTerrorGameRules::IsMissionFinalMap()
 // native bool L4D_IsMissionFinalMap();
 static cell_t L4D_IsMissionFinalMap(IPluginContext *pContext, const cell_t *params)
@@ -352,8 +332,7 @@ static cell_t L4D_IsMissionFinalMap(IPluginContext *pContext, const cell_t *para
 	return CTerrorGameRulesIsMissionFinalMap();
 }
 
-using fnScriptGetMaxFlowDistance = float (SAFETYHOOK_CCALL *)();
-static fnScriptGetMaxFlowDistance ScriptGetMaxFlowDistance;
+static float (SAFETYHOOK_CCALL *ScriptGetMaxFlowDistance)();
 // Script_GetMaxFlowDistance
 // native float L4D2Direct_GetMapMaxFlowDistance();
 static cell_t L4D2Direct_GetMapMaxFlowDistance(IPluginContext *pContext, const cell_t *params)
@@ -361,8 +340,7 @@ static cell_t L4D2Direct_GetMapMaxFlowDistance(IPluginContext *pContext, const c
 	return sp_ftoc(ScriptGetMaxFlowDistance());
 }
 
-using fnCTerrorPlayerGetFlowDistance = float (SAFETYHOOK_THISCALL *)(CBaseEntity*, int);
-static fnCTerrorPlayerGetFlowDistance CTerrorPlayerGetFlowDistance;
+static float (SAFETYHOOK_THISCALL *CTerrorPlayerGetFlowDistance)(CBaseEntity*, int);
 // float CTerrorPlayer::GetFlowDistance(TerrorNavArea::FlowType)
 // native float L4D2Direct_GetFlowDistance(int client);
 static cell_t L4D2Direct_GetFlowDistance(IPluginContext *pContext, const cell_t *params)
@@ -373,8 +351,7 @@ static cell_t L4D2Direct_GetFlowDistance(IPluginContext *pContext, const cell_t 
 	return sp_ftoc(flow);
 }
 
-using fnGetHighestFlowSurvivor = CBaseEntity* (SAFETYHOOK_THISCALL *)(void*, int);
-static fnGetHighestFlowSurvivor GetHighestFlowSurvivor;
+static CBaseEntity* (SAFETYHOOK_THISCALL *GetHighestFlowSurvivor)(void*, int);
 // CBaseEntity *CDirectorTacticalServices::GetHighestFlowSurvivor(TerrorNavArea::FlowType)
 // native int L4D_GetHighestFlowSurvivor();
 static cell_t L4D_GetHighestFlowSurvivor(IPluginContext *pContext, const cell_t *params)
@@ -384,8 +361,7 @@ static cell_t L4D_GetHighestFlowSurvivor(IPluginContext *pContext, const cell_t 
 }
 
 
-using fnGetFurthestSurvivorFlow = float (SAFETYHOOK_THISCALL *)(void*);
-static fnGetFurthestSurvivorFlow GetFurthestSurvivorFlow;
+static float (SAFETYHOOK_THISCALL *GetFurthestSurvivorFlow)(void*);
 // float CDirector::GetFurthestSurvivorFlow()
 // native float L4D2_GetFurthestSurvivorFlow();
 static cell_t L4D2_GetFurthestSurvivorFlow(IPluginContext *pContext, const cell_t *params)
@@ -414,8 +390,7 @@ static cell_t L4D2Direct_SetPendingMobCount(IPluginContext *pContext, const cell
 }
 
 
-using fnScriptReviveByDefibrillator = void (SAFETYHOOK_THISCALL *)(CBaseEntity*);
-static fnScriptReviveByDefibrillator ScriptReviveByDefibrillator;
+static void (SAFETYHOOK_THISCALL *ScriptReviveByDefibrillator)(CBaseEntity*);
 // void CTerrorPlayer::ScriptReviveByDefibrillator()
 //native void L4D2_VScriptWrapper_ReviveByDefib(int client);
 static cell_t L4D2_VScriptWrapper_ReviveByDefib(IPluginContext *pContext, const cell_t *params)
@@ -426,8 +401,7 @@ static cell_t L4D2_VScriptWrapper_ReviveByDefib(IPluginContext *pContext, const 
 }
 
 
-using fnCDirectorGetScriptValueInt = int (SAFETYHOOK_THISCALL *)(void*, const char*, int);
-static fnCDirectorGetScriptValueInt CDirectorGetScriptValueInt;
+static int (SAFETYHOOK_THISCALL *CDirectorGetScriptValueInt)(void*, const char*, int);
 // int CDirector::GetScriptValue(char const*, int)
 // native int L4D2_GetScriptValueInt(const char[] key, int value);
 static cell_t L4D2_GetScriptValueInt(IPluginContext *pContext, const cell_t *params)
@@ -438,8 +412,7 @@ static cell_t L4D2_GetScriptValueInt(IPluginContext *pContext, const cell_t *par
 	return CDirectorGetScriptValueInt(TheDirector, key, defValue);
 }
 
-using fnCDirectorGetScriptValueFloat = float (SAFETYHOOK_THISCALL *)(void*, const char*, float);
-static fnCDirectorGetScriptValueFloat CDirectorGetScriptValueFloat;
+static float (SAFETYHOOK_THISCALL *CDirectorGetScriptValueFloat)(void*, const char*, float);
 // float CDirector::GetScriptValue(char const*, float)
 // native float L4D2_GetScriptValueFloat(const char[] key, float value);
 static cell_t L4D2_GetScriptValueFloat(IPluginContext *pContext, const cell_t *params)
@@ -483,282 +456,53 @@ static const sp_nativeinfo_t MyNatives[] =
 	{NULL,	NULL},
 };
 
-bool left4dhooks::PrepNatives(IGameConfig *gamedata, char *error, size_t maxlength)
+bool left4dhooks::PrepNatives(IGameConfig *gamedata)
 {
-	const char *buffer = nullptr;
+	bool result = true;
 
 	// ---- GetAddress ----
-	buffer = "TheZombieManager";
-	if (!gamedata->GetAddress(buffer, (void**)&TheZombieManager)) 
-	{
-		snprintf(error, maxlength, "Failed to GetAddress: %s", buffer);
-		return false;
-	}
-
-	buffer = "TheDirector";
-	if (!gamedata->GetAddress(buffer, (void**)&TheDirector)) 
-	{
-		snprintf(error, maxlength, "Failed to GetAddress: %s", buffer);
-		return false;
-	}
-
-	buffer = "CurrentFinaleStage";
-	if (!gamedata->GetAddress(buffer, (void**)&g_pCurrentFinaleStage)) 
-	{
-		snprintf(error, maxlength, "Failed to GetAddress: %s", buffer);
-		return false;
-	}
-
-	buffer = "PendingMobCount";
-	if (!gamedata->GetAddress(buffer, (void**)&g_pPendingMobCount)) 
-	{
-		snprintf(error, maxlength, "Failed to GetAddress: %s", buffer);
-		return false;
-	}
-
-
-
+	GetAddressExt(gamedata, "TheZombieManager", TheZombieManager, result);
+	GetAddressExt(gamedata, "TheDirector", TheDirector, result);
+	GetAddressExt(gamedata, "CurrentFinaleStage", g_pCurrentFinaleStage, result);
+	GetAddressExt(gamedata, "PendingMobCount", g_pPendingMobCount, result);
 
 	// ---- GetOffset ----
-	buffer = "CBaseCombatCharacter::Weapon_GetSlot";
-	if (!gamedata->GetOffset(buffer, &g_WeaponGetSlot_vtableidx)) 
-	{
-		snprintf(error, maxlength, "Failed to GetOffset: %s", buffer);
-		return false;
-	}
-
-	buffer = "CBasePlayer::RemovePlayerItem";
-	if (!gamedata->GetOffset(buffer, &g_RemovePlayerItem_vtableidx)) 
-	{
-		snprintf(error, maxlength, "Failed to GetOffset: %s", buffer);
-		return false;
-	}
-
-	buffer = "m_music";
-	if (!gamedata->GetOffset(buffer, &g_PlayerMusic_offset)) 
-	{
-		snprintf(error, maxlength, "Failed to GetOffset: %s", buffer);
-		return false;
-	}
-
-	buffer = "m_customAbility";
-	if (!gamedata->GetOffset(buffer, &g_customAbility_offset)) 
-	{
-		snprintf(error, maxlength, "Failed to GetOffset: %s", buffer);
-		return false;
-	}
-
-	buffer = "m_zombieClass";
-	if (!gamedata->GetOffset(buffer, &g_zombieClass_offset)) 
-	{
-		snprintf(error, maxlength, "Failed to GetOffset: %s", buffer);
-		return false;
-	}
-
-	/*
-	printf("g_WeaponGetSlot_vtableidx = %i\n", g_WeaponGetSlot_vtableidx);
-	printf("g_RemovePlayerItem_vtableidx = %i\n", g_RemovePlayerItem_vtableidx);
-	printf("g_PlayerMusic_offset = %i\n", g_PlayerMusic_offset);
-	printf("g_customAbility_offset = %i\n", g_customAbility_offset);
-	printf("g_zombieClass_offset = %i\n", g_zombieClass_offset);
-	*/
-
+	GetOffsetExt(gamedata, "CBaseCombatCharacter::Weapon_GetSlot", g_WeaponGetSlot_vtableidx, result);
+	GetOffsetExt(gamedata, "CBasePlayer::RemovePlayerItem", g_RemovePlayerItem_vtableidx, result);
+	GetOffsetExt(gamedata, "m_music", g_PlayerMusic_offset, result);
+	GetOffsetExt(gamedata, "m_customAbility", g_customAbility_offset, result);
+	GetOffsetExt(gamedata, "m_zombieClass", g_zombieClass_offset, result);
 
 	// ---- GetMemSig ----
-	buffer = "ZombieManager::GetRandomPZSpawnPosition";
-	GetRandomPZSpawnPosition = nullptr;
-	if (!gamedata->GetMemSig(buffer, (void**)&GetRandomPZSpawnPosition) || !GetRandomPZSpawnPosition)
-	{
-		snprintf(error, maxlength, "Failed to GetMemSig: %s", buffer);
-		return false;
-	}
+	GetMemSigExt(gamedata, "ZombieManager::GetRandomPZSpawnPosition", GetRandomPZSpawnPosition, result);
+	GetMemSigExt(gamedata, "CTerrorPlayer::IsStaggering", CTerrorPlayerIsStaggering, result);
+	GetMemSigExt(gamedata, "Music::Play", MusicPlay, result);
+	GetMemSigExt(gamedata, "Music::StopPlaying", MusicStopPlaying, result);
+	GetMemSigExt(gamedata, "CTerrorGameRules::IsGenericCooperativeMode", IsGenericCooperativeMode, result);
+	GetMemSigExt(gamedata, "CBaseEntity::SetAbsOrigin", CBaseEntitySetAbsOrigin, result);
+	GetMemSigExt(gamedata, "CBaseEntity::SetAbsAngles", CBaseEntitySetAbsAngles, result);
+	GetMemSigExt(gamedata, "CBaseEntity::SetAbsVelocity", CBaseEntitySetAbsVelocity, result);
+	GetMemSigExt(gamedata, "CTerrorPlayer::TakeOverBot", CTerrorPlayerTakeOverBot, result);
+	GetMemSigExt(gamedata, "SurvivorBot::SetHumanSpectator", SurvivorBotSetHumanSpectator, result);
+	GetMemSigExt(gamedata, "CCSPlayer::State_Transition", CCSPlayerStateTransition, result);
+	GetMemSigExt(gamedata, "UTIL_Remove", UTIL_Remove, result);
+	GetMemSigExt(gamedata, "CTerrorPlayer::SetClass", CTerrorPlayerSetClass, result);
+	GetMemSigExt(gamedata, "CBaseAbility::CreateForPlayer", CBaseAbilityCreateForPlayer, result);
+	GetMemSigExt(gamedata, "CTerrorPlayer::TakeOverZombieBot", CTerrorPlayerTakeOverZombieBot, result);
+	GetMemSigExt(gamedata, "CDirector::IsFirstMapInScenario", CDirectorIsFirstMapInScenario, result);
+	GetMemSigExt(gamedata, "CTerrorGameRules::IsMissionFinalMap", CTerrorGameRulesIsMissionFinalMap, result);
+	GetMemSigExt(gamedata, "Script_GetMaxFlowDistance", ScriptGetMaxFlowDistance, result);
+	GetMemSigExt(gamedata, "CTerrorPlayer::GetFlowDistance", CTerrorPlayerGetFlowDistance, result);
+	GetMemSigExt(gamedata, "CDirectorTacticalServices::GetHighestFlowSurvivor", GetHighestFlowSurvivor, result);
+	GetMemSigExt(gamedata, "CDirector::GetFurthestSurvivorFlow", GetFurthestSurvivorFlow, result);
+	GetMemSigExt(gamedata, "CTerrorPlayer::ScriptReviveByDefibrillator", ScriptReviveByDefibrillator, result);
+	GetMemSigExt(gamedata, "CDirector::GetScriptValueInt", CDirectorGetScriptValueInt, result);
+	GetMemSigExt(gamedata, "CDirector::GetScriptValueFloat", CDirectorGetScriptValueFloat, result);
 
-	buffer = "CTerrorPlayer::IsStaggering";
-	CTerrorPlayerIsStaggering = nullptr;
-	if (!gamedata->GetMemSig(buffer, (void**)&CTerrorPlayerIsStaggering) || !CTerrorPlayerIsStaggering)
-	{
-		snprintf(error, maxlength, "Failed to GetMemSig: %s", buffer);
-		return false;
-	}
+	if (result)
+		sharesys->AddNatives(myself, MyNatives);
 
-	buffer = "Music::Play";
-	MusicPlay = nullptr;
-	if (!gamedata->GetMemSig(buffer, (void**)&MusicPlay) || !MusicPlay)
-	{
-		snprintf(error, maxlength, "Failed to GetMemSig: %s", buffer);
-		return false;
-	}
-
-	buffer = "Music::StopPlaying";
-	MusicStopPlaying = nullptr;
-	if (!gamedata->GetMemSig(buffer, (void**)&MusicStopPlaying) || !MusicStopPlaying)
-	{
-		snprintf(error, maxlength, "Failed to GetMemSig: %s", buffer);
-		return false;
-	}
-
-	buffer = "CTerrorGameRules::IsGenericCooperativeMode";
-	IsGenericCooperativeMode = nullptr;
-	if (!gamedata->GetMemSig(buffer, (void**)&IsGenericCooperativeMode) || !IsGenericCooperativeMode)
-	{
-		snprintf(error, maxlength, "Failed to GetMemSig: %s", buffer);
-		return false;
-	}
-
-	buffer = "CBaseEntity::SetAbsOrigin";
-	CBaseEntitySetAbsOrigin = nullptr;
-	if (!gamedata->GetMemSig(buffer, (void**)&CBaseEntitySetAbsOrigin) || !CBaseEntitySetAbsOrigin)
-	{
-		snprintf(error, maxlength, "Failed to GetMemSig: %s", buffer);
-		return false;
-	}
-
-	buffer = "CBaseEntity::SetAbsAngles";
-	CBaseEntitySetAbsAngles = nullptr;
-	if (!gamedata->GetMemSig(buffer, (void**)&CBaseEntitySetAbsAngles) || !CBaseEntitySetAbsAngles)
-	{
-		snprintf(error, maxlength, "Failed to GetMemSig: %s", buffer);
-		return false;
-	}
-
-	buffer = "CBaseEntity::SetAbsVelocity";
-	CBaseEntitySetAbsVelocity = nullptr;
-	if (!gamedata->GetMemSig(buffer, (void**)&CBaseEntitySetAbsVelocity) || !CBaseEntitySetAbsVelocity)
-	{
-		snprintf(error, maxlength, "Failed to GetMemSig: %s", buffer);
-		return false;
-	}
-
-	buffer = "CTerrorPlayer::TakeOverBot";
-	CTerrorPlayerTakeOverBot = nullptr;
-	if (!gamedata->GetMemSig(buffer, (void**)&CTerrorPlayerTakeOverBot) || !CTerrorPlayerTakeOverBot)
-	{
-		snprintf(error, maxlength, "Failed to GetMemSig: %s", buffer);
-		return false;
-	}
-
-	buffer = "SurvivorBot::SetHumanSpectator";
-	SurvivorBotSetHumanSpectator = nullptr;
-	if (!gamedata->GetMemSig(buffer, (void**)&SurvivorBotSetHumanSpectator) || !SurvivorBotSetHumanSpectator)
-	{
-		snprintf(error, maxlength, "Failed to GetMemSig: %s", buffer);
-		return false;
-	}
-
-	buffer = "CCSPlayer::State_Transition";
-	CCSPlayerStateTransition = nullptr;
-	if (!gamedata->GetMemSig(buffer, (void**)&CCSPlayerStateTransition) || !CCSPlayerStateTransition)
-	{
-		snprintf(error, maxlength, "Failed to GetMemSig: %s", buffer);
-		return false;
-	}
-
-	buffer = "UTIL_Remove";
-	UTIL_Remove = nullptr;
-	if (!gamedata->GetMemSig(buffer, (void**)&UTIL_Remove) || !UTIL_Remove)
-	{
-		snprintf(error, maxlength, "Failed to GetMemSig: %s", buffer);
-		return false;
-	}
-
-	buffer = "CTerrorPlayer::SetClass";
-	CTerrorPlayerSetClass = nullptr;
-	if (!gamedata->GetMemSig(buffer, (void**)&CTerrorPlayerSetClass) || !CTerrorPlayerSetClass)
-	{
-		snprintf(error, maxlength, "Failed to GetMemSig: %s", buffer);
-		return false;
-	}
-
-	buffer = "CBaseAbility::CreateForPlayer";
-	CBaseAbilityCreateForPlayer = nullptr;
-	if (!gamedata->GetMemSig(buffer, (void**)&CBaseAbilityCreateForPlayer) || !CBaseAbilityCreateForPlayer) 
-	{
-		snprintf(error, maxlength, "Failed to GetMemSig: %s", buffer);
-		return false;
-	}
-
-	buffer = "CTerrorPlayer::TakeOverZombieBot";
-	CTerrorPlayerTakeOverZombieBot = nullptr;
-	if (!gamedata->GetMemSig(buffer, (void**)&CTerrorPlayerTakeOverZombieBot) || !CTerrorPlayerTakeOverZombieBot)
-	{
-		snprintf(error, maxlength, "Failed to GetMemSig: %s", buffer);
-		return false;
-	}
-
-	buffer = "CDirector::IsFirstMapInScenario";
-	CDirectorIsFirstMapInScenario = nullptr;
-	if (!gamedata->GetMemSig(buffer, (void**)&CDirectorIsFirstMapInScenario) || !CDirectorIsFirstMapInScenario)
-	{
-		snprintf(error, maxlength, "Failed to GetMemSig: %s", buffer);
-		return false;
-	}
-
-	buffer = "CTerrorGameRules::IsMissionFinalMap";
-	CTerrorGameRulesIsMissionFinalMap = nullptr;
-	if (!gamedata->GetMemSig(buffer, (void**)&CTerrorGameRulesIsMissionFinalMap) || !CTerrorGameRulesIsMissionFinalMap)
-	{
-		snprintf(error, maxlength, "Failed to GetMemSig: %s", buffer);
-		return false;
-	}
-
-	buffer = "Script_GetMaxFlowDistance";
-	ScriptGetMaxFlowDistance = nullptr;
-	if (!gamedata->GetMemSig(buffer, (void**)&ScriptGetMaxFlowDistance) || !ScriptGetMaxFlowDistance)
-	{
-		snprintf(error, maxlength, "Failed to GetMemSig: %s", buffer);
-		return false;
-	}
-
-	buffer = "CTerrorPlayer::GetFlowDistance";
-	CTerrorPlayerGetFlowDistance = nullptr;
-	if (!gamedata->GetMemSig(buffer, (void**)&CTerrorPlayerGetFlowDistance) || !CTerrorPlayerGetFlowDistance)
-	{
-		snprintf(error, maxlength, "Failed to GetMemSig: %s", buffer);
-		return false;
-	}
-
-	buffer = "CDirectorTacticalServices::GetHighestFlowSurvivor";
-	GetHighestFlowSurvivor = nullptr;
-	if (!gamedata->GetMemSig(buffer, (void**)&GetHighestFlowSurvivor) || !GetHighestFlowSurvivor)
-	{
-		snprintf(error, maxlength, "Failed to GetMemSig: %s", buffer);
-		return false;
-	}
-
-	buffer = "CDirector::GetFurthestSurvivorFlow";
-	GetFurthestSurvivorFlow = nullptr;
-	if (!gamedata->GetMemSig(buffer, (void**)&GetFurthestSurvivorFlow) || !GetFurthestSurvivorFlow)
-	{
-		snprintf(error, maxlength, "Failed to GetMemSig: %s", buffer);
-		return false;
-	}
-
-	buffer = "CTerrorPlayer::ScriptReviveByDefibrillator";
-	ScriptReviveByDefibrillator = nullptr;
-	if (!gamedata->GetMemSig(buffer, (void**)&ScriptReviveByDefibrillator) || !ScriptReviveByDefibrillator)
-	{
-		snprintf(error, maxlength, "Failed to GetMemSig: %s", buffer);
-		return false;
-	}
-
-	buffer = "CDirector::GetScriptValueInt";
-	CDirectorGetScriptValueInt = nullptr;
-	if (!gamedata->GetMemSig(buffer, (void**)&CDirectorGetScriptValueInt) || !CDirectorGetScriptValueInt)
-	{
-		snprintf(error, maxlength, "Failed to GetMemSig: %s", buffer);
-		return false;
-	}
-
-	buffer = "CDirector::GetScriptValueFloat";
-	CDirectorGetScriptValueFloat = nullptr;
-	if (!gamedata->GetMemSig(buffer, (void**)&CDirectorGetScriptValueFloat) || !CDirectorGetScriptValueFloat)
-	{
-		snprintf(error, maxlength, "Failed to GetMemSig: %s", buffer);
-		return false;
-	}
-
-	sharesys->AddNatives(myself, MyNatives);
-	return true;
+	return result;
 }
 
 void left4dhooks::ClearNatives()

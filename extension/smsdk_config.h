@@ -40,7 +40,7 @@
 /* Basic information exposed publicly */
 #define SMEXT_CONF_NAME			"left4dhooks"
 #define SMEXT_CONF_DESCRIPTION	"An extension version of left4dhooks"
-#define SMEXT_CONF_VERSION		"0.1"
+#define SMEXT_CONF_VERSION		"0.2"
 #define SMEXT_CONF_AUTHOR		"SilverShot, fdxx"
 #define SMEXT_CONF_URL			"https://github.com/fdxx/left4dhooks"
 #define SMEXT_CONF_LOGTAG		"left4dhooks"

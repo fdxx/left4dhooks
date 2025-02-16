@@ -1,8 +1,8 @@
-#include "IForwardSys.h"
-#include "extension.h"
-#include "safetyhook.hpp"
-#include "sp_typeutil.h"
-#include "vector.h"
+#include <IForwardSys.h>
+#include <sp_typeutil.h>
+#include <mathlib/vector.h>
+#include <safetyhook.hpp>
+#include "left4dhooks.h"
 
 static SafetyHookInline g_hook_SpawnTank{};
 static SafetyHookInline g_hook_SpawnWitch{};
@@ -63,11 +63,7 @@ public:
 };
 
 
-template <typename R, typename T, typename... Args>
-inline void *GetMemberFuncAddr(R (T::*memberFunc)(Args...))
-{
-	return *(void **)&memberFunc;
-}
+
 
 
 CBaseEntity *ZombieManagerExt::SpawnTank(const Vector &vecPos, const QAngle &vecAng)
@@ -186,7 +182,6 @@ static int g_hThrower_offset;
 void CTankRockExt::OnRelease(Vector &vecPos, QAngle &vecAng, Vector &vecVel, Vector &vecRot)
 {
 	edict_t *pThrower = gamehelpers->GetHandleEntity(*(CBaseHandle*)((char*)this + g_hThrower_offset));
-	assert(pThrower);
 
 	int tank = gamehelpers->IndexOfEdict(pThrower);
 	int rock = gamehelpers->EntityToBCompatRef((CBaseEntity*)this);
@@ -258,19 +253,49 @@ void CDirectorScriptedEventManagerExt::ChangeFinaleStage(int stage, char const *
 }
 
 
-bool left4dhooks::PrepForward(IGameConfig *gamedata, char *error, size_t maxlength)
+template <typename R, typename T, typename... Args>
+inline void *GetMemberFuncAddr(R (T::*memberFunc)(Args...))
 {
+	return *(void **)&memberFunc;
+}
+
+static void CreateHookExt(IGameConfig *gamedata, const char *name, SafetyHookInline &hook, void *destination, bool &result)
+{
+	void *addr = nullptr;
+	if (!gamedata->GetMemSig(name, &addr) || !addr) 
+	{
+		smutils->LogError(myself, "Failed to GetMemSig: %s", name);
+		result = false;
+		return;
+	}
+
+	hook = safetyhook::create_inline(addr, destination);
+	if (!hook.enabled())
+	{
+		smutils->LogError(myself, "Failed to create_inline: %s", name);
+		result = false;
+	}
+}
+
+bool left4dhooks::PrepForward(IGameConfig *gamedata)
+{
+	bool result = true;
+
+	GetOffsetExt(gamedata, "m_hThrower", g_hThrower_offset, result);
+
 	// CBaseEntity* ZombieManager::SpawnTank(Vector const&, QAngle const&)
 	// forward Action L4D_OnSpawnTank(const float vecPos[3], const float vecAng[3]);
 	// forward void L4D_OnSpawnTank_Post(int client, const float vecPos[3], const float vecAng[3]);
 	g_fwd_OnSpawnTank_Pre = forwards->CreateForward("L4D_OnSpawnTank", ET_Event, 2, nullptr, Param_Array, Param_Array);
 	g_fwd_OnSpawnTank_Post = forwards->CreateForward("L4D_OnSpawnTank_Post", ET_Ignore, 3, nullptr, Param_Cell, Param_Array, Param_Array);
+	CreateHookExt(gamedata, "ZombieManager::SpawnTank", g_hook_SpawnTank, GetMemberFuncAddr(&ZombieManagerExt::SpawnTank), result);
 
 	// CBaseEntity* ZombieManager::SpawnWitch(Vector const&, QAngle const&)
 	// forward Action L4D_OnSpawnWitch(const float vecPos[3], const float vecAng[3]);
 	// forward void L4D_OnSpawnWitch_Post(int entity, const float vecPos[3], const float vecAng[3]);
 	g_fwd_OnSpawnWitch_Pre = forwards->CreateForward("L4D_OnSpawnWitch", ET_Event, 2, nullptr, Param_Array, Param_Array);
 	g_fwd_OnSpawnWitch_Post = forwards->CreateForward("L4D_OnSpawnWitch_Post", ET_Ignore, 3, nullptr, Param_Cell, Param_Array, Param_Array);
+	CreateHookExt(gamedata, "ZombieManager::SpawnWitch", g_hook_SpawnWitch, GetMemberFuncAddr(&ZombieManagerExt::SpawnWitch), result);
 
 
 	// CBaseEntity* ZombieManager::SpawnSpecial(ZombieClassType, Vector const&, QAngle const&)
@@ -278,151 +303,39 @@ bool left4dhooks::PrepForward(IGameConfig *gamedata, char *error, size_t maxleng
 	// forward void L4D_OnSpawnSpecial_Post(int client, int zombieClass, const float vecPos[3], const float vecAng[3]);
 	g_fwd_OnSpawnSpecial_Pre = forwards->CreateForward("L4D_OnSpawnSpecial", ET_Event, 3, nullptr, Param_CellByRef, Param_Array, Param_Array);
 	g_fwd_OnSpawnSpecial_Post = forwards->CreateForward("L4D_OnSpawnSpecial_Post", ET_Ignore, 4, nullptr, Param_Cell, Param_Cell, Param_Array, Param_Array);
+	CreateHookExt(gamedata, "ZombieManager::SpawnSpecial", g_hook_SpawnSpecial, GetMemberFuncAddr(&ZombieManagerExt::SpawnSpecial), result);
+
 
 	// void ZombieManager::SpawnMob(int)
 	// forward Action L4D_OnSpawnMob(int &amount);
 	g_fwd_OnSpawnMob_Pre = forwards->CreateForward("L4D_OnSpawnMob", ET_Event, 1, nullptr, Param_CellByRef);
+	CreateHookExt(gamedata, "ZombieManager::SpawnMob", g_hook_SpawnMob, GetMemberFuncAddr(&ZombieManagerExt::SpawnMob), result);
+
 
 	// int CTerrorPlayer::SelectWeightedSequence(Activity activity)
 	// forward Action L4D2_OnSelectWeightedSequence_Post(int client, int &sequence);
 	g_fwd_OnSelectWeightedSequence_Post = forwards->CreateForward("L4D2_OnSelectWeightedSequence_Post", ET_Event, 2, nullptr, Param_Cell, Param_CellByRef);
+	CreateHookExt(gamedata, "CTerrorPlayer::SelectWeightedSequence", g_hook_SelectWeightedSequence, GetMemberFuncAddr(&CTerrorPlayerExt::SelectWeightedSequence), result);
+
 
 	// void CTankRock::OnRelease(Vector const&, QAngle const&, Vector const&, Vector const&)
 	// forward Action L4D_TankRock_OnRelease(int tank, int rock, float vecPos[3], float vecAng[3], float vecVel[3], float vecRot[3]);
 	g_fwd_CTankRock_OnRelease_Pre = forwards->CreateForward("L4D_TankRock_OnRelease", ET_Event, 6, nullptr, Param_Cell, Param_Cell, Param_Array, Param_Array, Param_Array, Param_Array);
+	CreateHookExt(gamedata, "CTankRock::OnRelease", g_hook_CTankRock_OnRelease, GetMemberFuncAddr(&CTankRockExt::OnRelease), result);
+
 
 	// CTerrorPlayer* BossZombiePlayerBot::ChooseVictim(CTerrorPlayer*, int, CBaseCombatCharacter*)
 	// forward Action L4D2_OnChooseVictim(int specialInfected, int &curTarget);
 	g_fwd_OnChooseVictim_Post = forwards->CreateForward("L4D2_OnChooseVictim", ET_Event, 2, nullptr, Param_Cell, Param_CellByRef);
+	CreateHookExt(gamedata, "BossZombiePlayerBot::ChooseVictim", g_hook_ChooseVictim, GetMemberFuncAddr(&BossZombiePlayerBotExt::ChooseVictim), result);
+
 
 	// void CDirectorScriptedEventManager::ChangeFinaleStage(ScriptedEventStage, char const*)
 	// forward Action L4D2_OnChangeFinaleStage(int &finaleType, const char[] arg);
 	g_fwd_OnChangeFinaleStage_Pre = forwards->CreateForward("L4D2_OnChangeFinaleStage", ET_Event, 2, nullptr, Param_CellByRef, Param_String);
+	CreateHookExt(gamedata, "CDirectorScriptedEventManager::ChangeFinaleStage", g_hook_ChangeFinaleStage_Pre, GetMemberFuncAddr(&CDirectorScriptedEventManagerExt::ChangeFinaleStage), result);
 
-
-	const char *buffer = nullptr;
-	void *addr = nullptr;
-
-	buffer = "m_hThrower";
-	if (!gamedata->GetOffset(buffer, &g_hThrower_offset)) 
-	{
-		snprintf(error, maxlength, "Failed to GetOffset: %s", buffer);
-		return false;
-	}
-
-	buffer = "ZombieManager::SpawnTank";
-	addr = nullptr;
-	if (!gamedata->GetMemSig(buffer, &addr) || !addr) 
-	{
-		snprintf(error, maxlength, "Failed to GetMemSig: %s", buffer);
-		return false;
-	}
-	g_hook_SpawnTank = safetyhook::create_inline(addr, GetMemberFuncAddr(&ZombieManagerExt::SpawnTank));
-	if (!g_hook_SpawnTank.enabled())
-	{
-		snprintf(error, maxlength, "Failed to create_inline: %s", buffer);
-		return false;
-	}
-
-	buffer = "ZombieManager::SpawnWitch";
-	addr = nullptr;
-	if (!gamedata->GetMemSig(buffer, &addr) || !addr) 
-	{
-		snprintf(error, maxlength, "Failed to GetMemSig: %s", buffer);
-		return false;
-	}
-	g_hook_SpawnWitch = safetyhook::create_inline(addr, GetMemberFuncAddr(&ZombieManagerExt::SpawnWitch));
-	if (!g_hook_SpawnWitch.enabled())
-	{
-		snprintf(error, maxlength, "Failed to create_inline: %s", buffer);
-		return false;
-	}
-
-	buffer = "ZombieManager::SpawnSpecial";
-	addr = nullptr;
-	if (!gamedata->GetMemSig(buffer, &addr) || !addr) 
-	{
-		snprintf(error, maxlength, "Failed to GetMemSig: %s", buffer);
-		return false;
-	}
-	g_hook_SpawnSpecial = safetyhook::create_inline(addr, GetMemberFuncAddr(&ZombieManagerExt::SpawnSpecial));
-	if (!g_hook_SpawnSpecial.enabled())
-	{
-		snprintf(error, maxlength, "Failed to create_inline: %s", buffer);
-		return false;
-	}
-
-	buffer = "ZombieManager::SpawnMob";
-	addr = nullptr;
-	if (!gamedata->GetMemSig(buffer, &addr) || !addr) 
-	{
-		snprintf(error, maxlength, "Failed to GetMemSig: %s", buffer);
-		return false;
-	}
-	g_hook_SpawnMob = safetyhook::create_inline(addr, GetMemberFuncAddr(&ZombieManagerExt::SpawnMob));
-	if (!g_hook_SpawnMob.enabled())
-	{
-		snprintf(error, maxlength, "Failed to create_inline: %s", buffer);
-		return false;
-	}
-
-	buffer = "CTerrorPlayer::SelectWeightedSequence";
-	addr = nullptr;
-	if (!gamedata->GetMemSig(buffer, &addr) || !addr)  
-	{
-		snprintf(error, maxlength, "Failed to GetMemSig: %s", buffer);
-		return false;
-	}
-	g_hook_SelectWeightedSequence = safetyhook::create_inline(addr, GetMemberFuncAddr(&CTerrorPlayerExt::SelectWeightedSequence));
-	if (!g_hook_SelectWeightedSequence.enabled())
-	{
-		snprintf(error, maxlength, "Failed to create_inline: %s", buffer);
-		return false;
-	}
-
-	buffer = "CTankRock::OnRelease";
-	addr = nullptr;
-	if (!gamedata->GetMemSig(buffer, &addr) || !addr) 
-	{
-		snprintf(error, maxlength, "Failed to GetMemSig: %s", buffer);
-		return false;
-	}
-	g_hook_CTankRock_OnRelease = safetyhook::create_inline(addr, GetMemberFuncAddr(&CTankRockExt::OnRelease));
-	if (!g_hook_CTankRock_OnRelease.enabled())
-	{
-		snprintf(error, maxlength, "Failed to create_inline: %s", buffer);
-		return false;
-	}
-
-	buffer = "BossZombiePlayerBot::ChooseVictim";
-	addr = nullptr;
-	if (!gamedata->GetMemSig(buffer, &addr) || !addr) 
-	{
-		snprintf(error, maxlength, "Failed to GetMemSig: %s", buffer);
-		return false;
-	}
-	g_hook_ChooseVictim = safetyhook::create_inline(addr, GetMemberFuncAddr(&BossZombiePlayerBotExt::ChooseVictim));
-	if (!g_hook_ChooseVictim.enabled())
-	{
-		snprintf(error, maxlength, "Failed to create_inline: %s", buffer);
-		return false;
-	}
-
-	buffer = "CDirectorScriptedEventManager::ChangeFinaleStage";
-	addr = nullptr;
-	if (!gamedata->GetMemSig(buffer, &addr) || !addr) 
-	{
-		snprintf(error, maxlength, "Failed to GetMemSig: %s", buffer);
-		return false;
-	}
-	g_hook_ChangeFinaleStage_Pre = safetyhook::create_inline(addr, GetMemberFuncAddr(&CDirectorScriptedEventManagerExt::ChangeFinaleStage));
-	if (!g_hook_ChangeFinaleStage_Pre.enabled())
-	{
-		snprintf(error, maxlength, "Failed to create_inline: %s", buffer);
-		return false;
-	}
-
-	return true;
+	return result;
 }
 
 void left4dhooks::ClearForward()
